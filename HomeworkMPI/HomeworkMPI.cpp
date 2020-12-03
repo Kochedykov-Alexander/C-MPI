@@ -572,7 +572,7 @@ MPI_MINLOC.*/
 //
 //
 //int main(int argc, char** argv) {
-//    MPI_Init(&argc, &argv);
+//   MPI_Init(&argc, &argv);
 //
 //    int rank, size;
 //    MPI_Status status;
@@ -581,10 +581,10 @@ MPI_MINLOC.*/
 //    MPI_Comm_size(MPI_COMM_WORLD, &size);
 //
 //    const int p = size;
-//    const int N = 150;
-//    const int count = (int) (N/p);
-//    int globalData[N];
-//    int* localData = new int[count];
+//    const int n = 150;
+//    const int count = (int) (n/p);
+//    int globaldata[n];
+//    int* localdata = new int[count];
 //
 //    struct {
 //        float value;
@@ -594,31 +594,31 @@ MPI_MINLOC.*/
 //    local_in, local_out;
 //
 //    if (rank == 0) {
-//        for (int i = 0; i < N; i++) {
-//            globalData[i] = (int)(rand() % 100);
-//            cout << globalData[i] << " ";
+//        for (int i = 0; i < n; i++) {
+//            globaldata[i] = (int)(rand() % 100);
+//            cout << globaldata[i] << " ";
 //        }
 //        printf("\n process - %d defined global data \n", rank);
 //        printf("count of processes: %d, local_data count of massive = %d\n", size, count);
 //    }
 //
-//    MPI_Scatter(globalData, N / size, MPI_INT, &localData, N / size, MPI_INT, 0, MPI_COMM_WORLD);
+//    MPI_Scatter(globaldata, n / size, MPI_INT, &localdata, n / size, MPI_INT, 0, MPI_COMM_WORLD);
 //
-//    local_in.value = localData[0];
+//    local_in.value = localdata[0];
 //    local_in.index = 0;
 //    for (int i = 1; i < count; i++) {
-//        if (local_in.value > localData[i]) {
-//            local_in.value = localData[i];
+//        if (local_in.value > localdata[i]) {
+//            local_in.value = localdata[i];
 //            local_in.index = i;
 //        }
 //    }
 //    local_in.index = rank * count + local_in.index;
-//    MPI_Reduce(&local_in, &local_out, 1, MPI_FLOAT_INT, MPI_MINLOC, 0, MPI_COMM_WORLD);
+//   MPI_Reduce(&local_in, &local_out, 1, MPI_FLOAT_INT, MPI_MINLOC, 0, MPI_COMM_WORLD);
 //
 //
 //    if (rank == 0) {
 //        float min_value = local_out.value;
-//        int min_index = local_out.index % N;
+//        int min_index = local_out.index % n;
 //        cout << "\n\n minimal value = " << min_value << " with index = " << min_index;
 //    }
 //
@@ -653,9 +653,6 @@ MPI_MINLOC.*/
 
 
 		if (rank == 0) {
-
-
-
 
 			for (int i = 0; i < N; ++i) {
 				for (int j = 0; j < N; ++j) {
@@ -1001,53 +998,53 @@ MPI_Reduce, но сохраняет результат редукции в ад�
 MPI_Reduce и MPI_Bcast?
 */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <mpi.h>
-
-int main(int argc, char** argv)
-{
-	int x, sum = 0;
-	double beginTimeStamp, endTimeStamp, funcExecutionDuration, global;
-	int size, rank;
-
-	MPI_Init(&argc, &argv);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	MPI_Comm_size(MPI_COMM_WORLD, &size);
-
-	x = rand();
-
-	beginTimeStamp = MPI_Wtime();
-
-	MPI_Reduce(&x, &sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
-	MPI_Bcast(&sum, 1, MPI_INT, 0, MPI_COMM_WORLD);
-
-	endTimeStamp = MPI_Wtime();
-	funcExecutionDuration = endTimeStamp - beginTimeStamp;
-	MPI_Reduce(&funcExecutionDuration, &global, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
-
-	if (rank == 0)
-	{
-		printf("MPI_Reduce + MPI_Bcast time: %f\n", global);
-	}
-
-	sum = 0;
-
-	beginTimeStamp = MPI_Wtime();
-
-	MPI_Allreduce(&x, &sum, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
-
-	endTimeStamp = MPI_Wtime();
-	funcExecutionDuration = endTimeStamp - beginTimeStamp;
-	MPI_Reduce(&funcExecutionDuration, &global, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
-
-	if (rank == 0)
-	{
-		printf("MPI_Allreduce time: %f\n", global);
-	}
-
-	MPI_Finalize();
-}
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <mpi.h>
+//
+//int main(int argc, char** argv)
+//{
+//	int x, sum = 0;
+//	double beginTimeStamp, endTimeStamp, funcExecutionDuration, global;
+//	int size, rank;
+//
+//	MPI_Init(&argc, &argv);
+//	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//	MPI_Comm_size(MPI_COMM_WORLD, &size);
+//
+//	x = rand();
+//
+//	beginTimeStamp = MPI_Wtime();
+//
+//	MPI_Reduce(&x, &sum, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+//	MPI_Bcast(&sum, 1, MPI_INT, 0, MPI_COMM_WORLD);
+//
+//	endTimeStamp = MPI_Wtime();
+//	funcExecutionDuration = endTimeStamp - beginTimeStamp;
+//	MPI_Reduce(&funcExecutionDuration, &global, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+//
+//	if (rank == 0)
+//	{
+//		printf("MPI_Reduce + MPI_Bcast time: %f\n", global);
+//	}
+//
+//	sum = 0;
+//
+//	beginTimeStamp = MPI_Wtime();
+//
+//	MPI_Allreduce(&x, &sum, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+//
+//	endTimeStamp = MPI_Wtime();
+//	funcExecutionDuration = endTimeStamp - beginTimeStamp;
+//	MPI_Reduce(&funcExecutionDuration, &global, 1, MPI_DOUBLE, MPI_MAX, 0, MPI_COMM_WORLD);
+//
+//	if (rank == 0)
+//	{
+//		printf("MPI_Allreduce time: %f\n", global);
+//	}
+//
+//	MPI_Finalize();
+//}
 
 /*
 15. На процессе с номером 0 объявить и заполнить значениями матрицу a[8][8]. 
@@ -1057,53 +1054,309 @@ int main(int argc, char** argv)
 */
 
 
+
+//#include <stdio.h>
+//#include <stdlib.h>
+//#include <mpi.h>
+//#include <iostream>
+//#include <cmath>
+//using namespace std;
+//
+//
+//int main(int argc, char** argv)
+//{
+//	int rank, size;
+//
+//	MPI_Init(&argc, &argv);
+//	MPI_Comm_size(MPI_COMM_WORLD, &size);
+//	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//	MPI_Datatype newtype;
+//
+//	MPI_Type_vector(4, 8, 16, MPI_INT, &newtype);
+//	MPI_Type_commit(&newtype);
+//
+//	int b[4][8];
+//	int c[4][8];
+//
+//	if (rank == 0) {
+//
+//		int a[8][8];
+//
+//		for (int i = 0; i < 8; i++) {
+//			for (int j = 0; j < 8; j++) {
+//				a[i][j] = rand() % 100;
+//			}
+//		}
+//
+//		cout << "matrix а: " << endl;
+//
+//		for (int i = 0; i < 8; i++) {
+//			for (int j = 0; j < 8; j++) {
+//				cout << a[i][j] << " ";
+//			}
+//			cout << endl;
+//		}
+//
+//		for (int i = 0; i < 2; i++) {
+//			MPI_Send(&a[i][0], 1, newtype, i + 1, 1, MPI_COMM_WORLD);
+//		}
+//
+//
+//	}
+//
+//	if (rank == 1) {
+//
+//
+//		MPI_Status secondStatus;
+//		int secondSize;
+//
+//		MPI_Probe(0, 1, MPI_COMM_WORLD, &secondStatus);
+//		MPI_Get_count(&secondStatus, MPI_INT, &secondSize);
+//
+//		int* secondArray = new int[secondSize];
+//		MPI_Recv(secondArray, secondSize, MPI_INT, 0, 1, MPI_COMM_WORLD, &secondStatus);
+//
+//		int count = 0;
+//		for (int i = 0; i < 8 / 2; i++) {
+//			for (int j = 0; j < 8; j++) {
+//				b[i][j] = secondArray[count];
+//				count++;
+//			}
+//		}
+//
+//		for (int i = 0; i < 4; i++) {
+//			cout << "part of matrix b: " << endl;
+//			for (int j = 0; j < 8; j++) {
+//				cout << b[i][j] << " ";
+//			}
+//			cout << endl;
+//
+//		}
+//
+//
+//
+//	}
+//
+//
+//
+//	if (rank == 2) {
+//
+//		MPI_Status firstStatus;
+//		int firstSize;
+//
+//		MPI_Probe(0, 1, MPI_COMM_WORLD, &firstStatus);
+//		MPI_Get_count(&firstStatus, MPI_INT, &firstSize);
+//
+//		int* firstArray = new int[firstSize];
+//		MPI_Recv(firstArray, firstSize, MPI_INT, 0, 1, MPI_COMM_WORLD, &firstStatus);
+//
+//		int count = 0;
+//		for (int i = 0; i < 4; i++) {
+//			for (int j = 0; j < 8; j++) {
+//				c[i][j] = firstArray[count];
+//				count++;
+//			}
+//		}
+//
+//
+//		for (int i = 0; i < 4; i++) {
+//			cout << "part of matrix c: " << endl;
+//			for (int j = 0; j < 8; j++) {
+//				cout << c[i][j] << " ";
+//			}
+//			cout << endl;
+//		}
+//	}
+//
+//
+//	
+//
+//
+//
+//
+//	MPI_Finalize();
+//
+//	
+//}
+
+
+
+/*
+16. Создать тип данных с помощью функции MPI_Type_create_struct и 
+выполнить рассылку строк матрицы a[8][8] на 4 процесса в матрицу d[2][8] по следующей схеме:
+на нулевой процесс строки 0 и 4,
+на первый процесс строки 1 и 5,
+на второй процесс строки 2 и 6,
+на третий процесс строки 3 и 7.
+*/
+
 using namespace std;
 
+#include <stdlib.h>
+#include <iostream>
+#include <cmath>
+#include "mpi.h">
+#include <stdio.h>
+#include <stddef.h>
+#include <math.h>
+
+
+struct MyType {
+	int first[8];
+	int second[8];
+};
 
 int main(int argc, char** argv)
 {
 	int rank, size;
-
+	int a[8][8];
+	int blockslegth[2] = {8 , 8};
 	MPI_Init(&argc, &argv);
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	MPI_Datatype ntype;
-	MPI_Datatype ctype;
+	struct MyType my;
+	
+	
+	
+	MPI_Datatype newtype;
 
-	MPI_Type_contiguous(1, MPI_INT, &ntype);
-	MPI_Type_commit(&ntype);
 
-	int b[4][8];
-	int c[4][8];
+
+	MPI_Datatype types[2] = { MPI_INT, MPI_INT };
+	MPI_Aint adr[2];
+
+	adr[0] = offsetof(struct MyType, first);
+	adr[1] = offsetof(struct MyType, second);
+
+	MPI_Type_create_struct(2, blockslegth, adr, types, &newtype);
+	MPI_Type_commit(&newtype);
+
 
 	if (rank == 0) {
-
-		int a[8][8];
-
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
 				a[i][j] = rand() % 100;
 			}
 		}
 
-
 		for (int i = 0; i < 8; i++) {
 			for (int j = 0; j < 8; j++) {
-				if (i % 2 == 0) {
-					MPI_Send(&a[i][j], 1, ntype, 3, 11, MPI_COMM_WORLD);
-				}
+				cout << a[i][j] << " ";
 			}
+			cout << endl;
+		}
+
+		cout << endl;
+
+		for (int i = 0; i < 4; i++) {
+			for (int j = 0; j < 8; j++) {
+				my.first[j] = a[i + 4][j];
+				my.second[j] = a[i][j];
+				
+
+			}
+			MPI_Send(&my, 1, newtype, i, 33, MPI_COMM_WORLD);
+		}
+
+		MPI_Status status;
+		MPI_Recv(&my, 1, newtype, 0, 33, MPI_COMM_WORLD, &status);
+
+		int d[2][8];
+
+		for (int j = 0; j < 8; j++) {
+			d[0][j] = my.first[j];
+			d[1][j] = my.second[j];
+		}
+		cout << endl;
+
+
+		cout << "matrix on process : " << rank << endl;
+
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j < 8; j++) {
+				cout << d[i][j] << " ";
+			}
+			cout << endl;
+		}
+
+		
+
+	}
+
+	if (rank == 1) {
+		MPI_Status status1;
+		MPI_Recv(&my, 1, newtype, 0, 33, MPI_COMM_WORLD, &status1);
+		int d[2][8];
+		
+			for (int j = 0; j < 8; j++) {
+				d[0][j] = my.first[j]  ;
+				d[1][j] = my.second[j];
+			}
+			cout << endl;
+
+
+			cout << "matrix on process : " << rank << endl;
+
+			for (int i = 0; i < 2; i++) {
+				for (int j = 0; j < 8; j++) {
+					cout << d[i][j] << " ";
+				}
+				cout << endl;
+			}
+	}
+
+	if (rank == 2) {
+		MPI_Status status2;
+		MPI_Recv(&my, 1, newtype, 0, 33, MPI_COMM_WORLD, &status2);
+
+		int d[2][8];
+
+		for (int j = 0; j < 8; j++) {
+			d[0][j] = my.first[j];
+			d[1][j] = my.second[j];
+		}
+		cout << endl;
+
+
+		cout << "matrix on process : " << rank << endl;
+
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j < 8; j++) {
+				cout << d[i][j] << " ";
+			}
+			cout << endl;
 		}
 	}
 
-	else if (rank == 3) {
+	if (rank == 3) {
+		MPI_Status status3;
+		MPI_Recv(&my, 1, newtype, 0, 33, MPI_COMM_WORLD, &status3);
+
+		int d[2][8];
+
+		for (int j = 0; j < 8; j++) {
+			d[0][j] = my.first[j];
+			d[1][j] = my.second[j];
+		}
+		cout << endl;
 
 
+		cout << "matrix on process : " << rank << endl;
 
+		for (int i = 0; i < 2; i++) {
+			for (int j = 0; j < 8; j++) {
+				cout << d[i][j] << " ";
+			}
+			cout << endl;
+		}
 	}
-	
 
-	}
-
+	MPI_Type_free(&newtype);
+	MPI_Finalize();
+	return 0;
 
 }
+
+
+
+
