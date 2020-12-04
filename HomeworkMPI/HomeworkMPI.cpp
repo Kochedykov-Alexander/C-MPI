@@ -1050,7 +1050,7 @@ MPI_Reduce и MPI_Bcast?
 15. На процессе с номером 0 объявить и заполнить значениями матрицу a[8][8]. 
 Создать новый тип данных для рассылки нечетных строк  матрицы а в матрицу b[4][8],
 и для рассылки   четных   строк   матрицы  в  матрицу   c[4][8],   
-используя   функцию MPI_Type_vector.
+используйте  функцию MPI_Type_vector.
 */
 
 
@@ -1190,173 +1190,553 @@ MPI_Reduce и MPI_Bcast?
 на третий процесс строки 3 и 7.
 */
 
+//using namespace std;
+//
+//#include <stdlib.h>
+//#include <iostream>
+//#include <cmath>
+//#include "mpi.h">
+//#include <stdio.h>
+//#include <stddef.h>
+//#include <math.h>
+//
+//
+//struct MyType {
+//	int first[8];
+//	int second[8];
+//};
+//
+//int main(int argc, char** argv)
+//{
+//	int rank, size;
+//	int a[8][8];
+//	int blockslegth[2] = {8 , 8};
+//	MPI_Init(&argc, &argv);
+//	MPI_Comm_size(MPI_COMM_WORLD, &size);
+//	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//	struct MyType my;
+//	
+//	
+//	
+//	MPI_Datatype newtype;
+//
+//
+//
+//	MPI_Datatype types[2] = { MPI_INT, MPI_INT };
+//	MPI_Aint adr[2];
+//
+//	adr[0] = offsetof(struct MyType, first);
+//	adr[1] = offsetof(struct MyType, second);
+//
+//	MPI_Type_create_struct(2, blockslegth, adr, types, &newtype);
+//	MPI_Type_commit(&newtype);
+//
+//
+//	if (rank == 4) {
+//		for (int i = 0; i < 8; i++) {
+//			for (int j = 0; j < 8; j++) {
+//				a[i][j] = rand() % 100;
+//			}
+//		}
+//
+//		for (int i = 0; i < 8; i++) {
+//			for (int j = 0; j < 8; j++) {
+//				cout << a[i][j] << " ";
+//			}
+//			cout << endl;
+//		}
+//
+//		cout << endl;
+//
+//		for (int i = 0; i < size - 1; i++) {
+//			for (int j = 0; j < 8; j++) {
+//				my.first[j] = a[i + 4][j];
+//				my.second[j] = a[i][j];
+//				
+//
+//			}
+//			MPI_Send(&my, 1, newtype, i, 33, MPI_COMM_WORLD);
+//		}		
+//
+//	}
+//
+//	if (rank == 0) {
+//		MPI_Status status;
+//		MPI_Recv(&my, 1, newtype, 4, 33, MPI_COMM_WORLD, &status);
+//
+//		int d[2][8];
+//
+//		for (int j = 0; j < 8; j++) {
+//			d[0][j] = my.first[j];
+//			d[1][j] = my.second[j];
+//		}
+//		cout << endl;
+//
+//
+//		cout << "matrix on process : " << rank << endl;
+//
+//		for (int i = 0; i < 2; i++) {
+//			for (int j = 0; j < 8; j++) {
+//				cout << d[i][j] << " ";
+//			}
+//			cout << endl;
+//		}
+//	}
+//
+//	if (rank == 1) {
+//		MPI_Status status1;
+//		MPI_Recv(&my, 1, newtype, 4, 33, MPI_COMM_WORLD, &status1);
+//		int d[2][8];
+//		
+//			for (int j = 0; j < 8; j++) {
+//				d[0][j] = my.first[j]  ;
+//				d[1][j] = my.second[j];
+//			}
+//			cout << endl;
+//
+//
+//			cout << "matrix on process : " << rank << endl;
+//
+//			for (int i = 0; i < 2; i++) {
+//				for (int j = 0; j < 8; j++) {
+//					cout << d[i][j] << " ";
+//				}
+//				cout << endl;
+//			}
+//	}
+//
+//	if (rank == 2) {
+//		MPI_Status status2;
+//		MPI_Recv(&my, 1, newtype, 4, 33, MPI_COMM_WORLD, &status2);
+//
+//		int d[2][8];
+//
+//		for (int j = 0; j < 8; j++) {
+//			d[0][j] = my.first[j];
+//			d[1][j] = my.second[j];
+//		}
+//		cout << endl;
+//
+//
+//		cout << "matrix on process : " << rank << endl;
+//
+//		for (int i = 0; i < 2; i++) {
+//			for (int j = 0; j < 8; j++) {
+//				cout << d[i][j] << " ";
+//			}
+//			cout << endl;
+//		}
+//	}
+//
+//	if (rank == 3) {
+//		MPI_Status status3;
+//		MPI_Recv(&my, 1, newtype, 4, 33, MPI_COMM_WORLD, &status3);
+//
+//		int d[2][8];
+//
+//		for (int j = 0; j < 8; j++) {
+//			d[0][j] = my.first[j];
+//			d[1][j] = my.second[j];
+//		}
+//		cout << endl;
+//
+//
+//		cout << "matrix on process : " << rank << endl;
+//
+//		for (int i = 0; i < 2; i++) {
+//			for (int j = 0; j < 8; j++) {
+//				cout << d[i][j] << " ";
+//			}
+//			cout << endl;
+//		}
+//	}
+//
+//	MPI_Type_free(&newtype);
+//	MPI_Finalize();
+//	return 0;
+//
+//}
+
+
+/*
+17. На  одном  из  процессов  объявить  и  заполнить  значениями  верхнюю  треугольную матрицу.  
+Создать  новый тип  данных  для  передачи  ненулевых  элементов  матрицы, используя  конструктор MPI_Type_indexed. 
+Выполнить  передачу  элементов  на  все процессы с помощью функции MPI_Bcast.
+*/
+
+
+
+//#include <iostream>
+//#include <mpi.h>
+//#include <stdio.h>
+//#include <math.h>
+//
+//using namespace std;
+//
+//void printArray(int n, int m, int a[8][8])
+//{
+//    for (int i = 0; i < n; i++) {
+//        for (int j = 0; j < m; j++) {
+//            cout << a[i][j] << " ";
+//        }
+//        cout << endl;
+//    }
+//}
+//
+//int main(int argc, char** argv) {
+//
+//    
+//    int rank;
+//    int size;
+//
+//
+//    MPI_Init(&argc, &argv);
+//
+//
+//    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//
+//    MPI_Comm_size(MPI_COMM_WORLD, &size);
+//
+//    const int m = 8;
+//    const int n = 8;
+//
+//    int a[n][m] =
+//    {
+//            {0,0,0,0,0,0,0,0},
+//            {0,0,0,0,0,0,0,0},
+//            {0,0,0,0,0,0,0,0},
+//            {0,0,0,0,0,0,0,0},
+//            {0,0,0,0,0,0,0,0},
+//            {0,0,0,0,0,0,0,0},
+//            {0,0,0,0,0,0,0,0},
+//            {0,0,0,0,0,0,0,0},
+//    };
+//
+//    MPI_Datatype newType;
+//    int blocksLength[n] = { 8,7,6,5,4,3,2,1 };
+//    int indices[n] = { 0,9,18,27,36,45,54,63 };
+//    MPI_Type_indexed(n, blocksLength, indices, MPI_INT, &newType);
+//    MPI_Type_commit(&newType);
+//
+//    if (rank == 0) {
+//        int counter = 1;
+//        for (int i = 0; i < n; i++) {
+//            for (int j = 0; j < n; j++) {
+//                a[i][j] = counter;
+//                counter++;
+//            }
+//        }
+//
+//        cout << "print a: " << endl;
+//        printArray(n, m, a);
+//    }
+//
+//    MPI_Bcast(&a, 1, newType, 0, MPI_COMM_WORLD);
+//
+//    if (rank == 1) {
+//        cout << "rectangle: " << endl;
+//        printArray(n, m, a);
+//    }
+//
+//
+//    
+//    MPI_Finalize();
+//    return 0;
+//}
+
+
+/*
+* 18. Пусть на нулевом процессе определены и заданы массив из десяти целых чисел и массив из восьми вещественных чисел. 
+Упаковать два массива. Передать упакованные данные на все процессы. Распаковать на всех процессах принятые данные. 
+Результат выдать на экран.
+*/
+
+//#include <iostream>
+//#include <mpi.h>
+//#include <stdio.h>
+//#include <math.h>
+//
+//using namespace std;
+//
+//struct MyStruct
+//{
+//    int first[10];
+//    double second[8];
+//};
+//
+//int main(int argc, char** argv) {
+//
+//    int rank;
+//    int size;
+//
+//
+//    //Инициализируем mpi
+//    MPI_Init(&argc, &argv);
+//
+//    //возвращает номер текущего процесс в коммуникаторе
+//    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//
+//    MPI_Comm_size(MPI_COMM_WORLD, &size);
+//
+//    struct MyStruct my;
+//    int blocksLengths[2] = { 10, 8 };
+//
+//    MPI_Datatype types[2] = { MPI_INT, MPI_DOUBLE };
+//    MPI_Aint adr[2];
+//
+//    adr[0] = offsetof(struct MyStruct, first);
+//    adr[1] = offsetof(struct MyStruct, second);
+//
+//    MPI_Datatype newType;
+//
+//    MPI_Type_create_struct(2, blocksLengths, adr, types, &newType);
+//    MPI_Type_commit(&newType);
+//
+//    if (rank == 0) {
+//        cout << "array a: " << endl;
+//        for (int i = 0; i < 10; i++) {
+//            my.first[i] = i;
+//            cout << my.first[i] << " ";
+//        }
+//        cout << endl;
+//
+//       double a = -0.3;
+//       double b = 1.7;
+//       
+//        for (int i = 0; i < 8; i++) {
+//            my.second[i] = (double)rand() / (double)RAND_MAX * (b - a) + a;;
+//            cout << my.second[i] << " ";
+//        }
+//        cout << endl;
+//        for (int i = 1; i < size; i++)
+//            MPI_Send(&my, 1, newType, i, 1, MPI_COMM_WORLD);
+//    }
+//    else {
+//        MPI_Status status;
+//
+//        MPI_Recv(&my, 1, newType, 0, 1, MPI_COMM_WORLD, &status);
+//
+//        
+//        for (int j = 0; j < 10; j++) {
+//            cout << my.first[j] << " ";
+//            
+//        }
+//        cout << "on process : " << rank << endl;
+//        cout << endl;
+//
+//        for (int j = 0; j < 8; j++) {
+//            cout << my.second[j] << " ";
+//        }
+//        cout << "on process : " << rank << endl;
+//        cout << endl;
+//    }
+//
+//
+//    
+//    MPI_Finalize();
+//    return 0;
+//}
+
+
+/*
+19. Создать новую группу  из процессов с номерами 8, 3, 9, 1, 6. Используя  конструктор MPI_Comm_create(...),создать коммуникатор группы.
+На нулевом процессе созданной группы  объявить   и  заполнить  числовыми  значениями  одномерный  массив вещественных чисел и вывести его на экран. 
+Используя  функцию  MPI_Bcast  передать массив  всем  процессам  созданной  группы.  Полученные  массивы  вывести на  экран. 
+Передать полученный массив из последнего процесса новой группы на нулевой процесс исходной группы.
+Выполнить программу на 10 процессах.
+*/
+
+
+//#include <iostream>
+//#include <cmath>
+//#include "mpi.h"
+//#include <stdio.h>
+//#include <cstdlib>
+//
+//using namespace std;
+//
+//#define N 10
+//
+//
+//
+//int main( int argc, char **argv) {
+//    MPI_Init(&argc, &argv);
+//    
+//    int rank, size;
+//    MPI_Status status;
+//
+//    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//    MPI_Comm_size(MPI_COMM_WORLD, &size);
+//    
+//
+//    int newGroup[5] = { 8, 3, 9, 1, 6 };
+//
+//    MPI_Group group, newgroup;
+//    MPI_Comm_group(MPI_COMM_WORLD, &group);
+//    MPI_Group_incl(group, 5, newGroup, &newgroup);
+//
+//    MPI_Comm comm, local;
+//    MPI_Comm_create(MPI_COMM_WORLD, newgroup, &comm);
+//
+//    int newrank=-1;
+//
+//    int a[N];
+//
+//    if (comm != MPI_COMM_NULL)  {
+//        MPI_Comm_rank(comm, &newrank);
+//    }
+//
+//    if (newrank==0 && comm != MPI_COMM_NULL) {
+//        for (int i = 0; i < N; i++) {
+//            a[i] = rand() % 100;
+//        }
+//        cout << "currently array:" << " ";
+//        cout << "\n";
+//        for (int i = 0; i < N; i++) {
+//            cout << a[i] << " ";
+//        }
+//
+//        cout << "\n";
+//        MPI_Bcast(&a, N, MPI_INT, 0, comm);
+//    }
+//
+//    if (newrank != -1 && comm != MPI_COMM_NULL) {
+//      MPI_Bcast(&a, N, MPI_INT, 0, comm);
+//      printf("%d - rank for print array\n", newrank);
+//      
+//      for (int i = 0; i < N; i++) {
+//          cout << a[i] << " ";
+//      }
+//
+//      cout << "\n";
+//
+//
+//      if (newrank == 4) {
+//          MPI_Send(a, N, MPI_INT, 0, 0, MPI_COMM_WORLD);
+//      }
+//    }
+//
+//    if (rank == 0 ) {
+//      MPI_Recv(a, N, MPI_INT, 6, 0, MPI_COMM_WORLD, &status);
+//      printf("\n\n\n RECV DATA to 0 MPI_COMM_WORLD");
+//
+//      for (int i = 0; i < N; i++) {
+//          cout << a[i] << " ";
+//      }
+//
+//      cout << "\n";
+//    }
+//
+//
+//    if (comm != MPI_COMM_NULL) {
+//      MPI_Comm_free(&comm);
+//    }
+//
+//    MPI_Group_free(&newgroup);
+//
+//    MPI_Finalize();
+//    return 0;
+//}
+//
+//
+
+
+/*
+20. На основе исходной группы, создать 4 новые группы процессов со своим коммуникатором.
+На каждом процессе каждой группы объявить одномерный массив целых чисел и заполнить его
+числовыми значениями, равными номеру группы. Используя коллективные операции, собрать
+локальные массивы на нулевых   процессах каждой группы. Полученные массивы выдать на экран.
+Используя интеркоммуникатор, выполнить обмен собранными массивами между
+первой – второй и третьей - четвертой группами.
+Полученные массивы выдать на экран. Выполнить программу на 12 процессах.
+*/
+
+#include "mpi.h"
+#include <iostream>
+#include <cstdlib>
+
 using namespace std;
 
-#include <stdlib.h>
-#include <iostream>
-#include <cmath>
-#include "mpi.h">
-#include <stdio.h>
-#include <stddef.h>
-#include <math.h>
-
-
-struct MyType {
-	int first[8];
-	int second[8];
-};
 
 int main(int argc, char** argv)
 {
-	int rank, size;
-	int a[8][8];
-	int blockslegth[2] = {8 , 8};
 	MPI_Init(&argc, &argv);
+
+	int size, rank;
 	MPI_Comm_size(MPI_COMM_WORLD, &size);
 	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	struct MyType my;
-	
-	
-	
-	MPI_Datatype newtype;
 
+	MPI_Comm comm;
 
+	int block = rank / 3;
+	MPI_Comm_split(MPI_COMM_WORLD, block, rank % 3, &comm);
 
-	MPI_Datatype types[2] = { MPI_INT, MPI_INT };
-	MPI_Aint adr[2];
+	int newrank = -1;
+	if (comm != MPI_COMM_NULL) {
+		MPI_Comm_rank(comm, &newrank);
+	}
+	int comm_size = -1;
+	if (comm != MPI_COMM_NULL) {
+		MPI_Comm_size(comm, &comm_size);
+	}
 
-	adr[0] = offsetof(struct MyType, first);
-	adr[1] = offsetof(struct MyType, second);
+	int groups[4] = { block, block, block, block};
 
-	MPI_Type_create_struct(2, blockslegth, adr, types, &newtype);
-	MPI_Type_commit(&newtype);
+	int com[12];
+	MPI_Gather(&groups, 4, MPI_INT, &com, 4, MPI_INT, 0, comm);
 
 
 	if (rank == 0) {
-		for (int i = 0; i < 8; i++) {
-			for (int j = 0; j < 8; j++) {
-				a[i][j] = rand() % 100;
-			}
-		}
-
-		for (int i = 0; i < 8; i++) {
-			for (int j = 0; j < 8; j++) {
-				cout << a[i][j] << " ";
-			}
-			cout << endl;
-		}
-
-		cout << endl;
-
-		for (int i = 0; i < 4; i++) {
-			for (int j = 0; j < 8; j++) {
-				my.first[j] = a[i + 4][j];
-				my.second[j] = a[i][j];
-				
-
-			}
-			MPI_Send(&my, 1, newtype, i, 33, MPI_COMM_WORLD);
-		}
-
-		MPI_Status status;
-		MPI_Recv(&my, 1, newtype, 0, 33, MPI_COMM_WORLD, &status);
-
-		int d[2][8];
-
-		for (int j = 0; j < 8; j++) {
-			d[0][j] = my.first[j];
-			d[1][j] = my.second[j];
+		cout << "from " << block << " group, com = ";
+		for (int i = 0; i < 12; ++i) {
+			cout << com[i] << " ";
 		}
 		cout << endl;
-
-
-		cout << "matrix on process : " << rank << endl;
-
-		for (int i = 0; i < 2; i++) {
-			for (int j = 0; j < 8; j++) {
-				cout << d[i][j] << " ";
-			}
-			cout << endl;
-		}
-
-		
-
 	}
 
-	if (rank == 1) {
-		MPI_Status status1;
-		MPI_Recv(&my, 1, newtype, 0, 33, MPI_COMM_WORLD, &status1);
-		int d[2][8];
-		
-			for (int j = 0; j < 8; j++) {
-				d[0][j] = my.first[j]  ;
-				d[1][j] = my.second[j];
-			}
-			cout << endl;
+	int tag = -1;
+	int rlead = -1;
 
-
-			cout << "matrix on process : " << rank << endl;
-
-			for (int i = 0; i < 2; i++) {
-				for (int j = 0; j < 8; j++) {
-					cout << d[i][j] << " ";
-				}
-				cout << endl;
-			}
+	if (block == 0) {
+		tag = 333;
+		rlead = 3;
+	}
+	if (block == 1) {
+		tag = 333;
+		rlead = 0;
+	}
+	if (block == 2) {
+		tag = 999;
+		rlead = 9;
+	}
+	if (block == 3) {
+		tag = 999;
+		rlead = 6;
 	}
 
-	if (rank == 2) {
-		MPI_Status status2;
-		MPI_Recv(&my, 1, newtype, 0, 33, MPI_COMM_WORLD, &status2);
+	MPI_Comm intercomm;
+	MPI_Intercomm_create(comm, 0, MPI_COMM_WORLD, rlead, tag, &intercomm);
 
-		int d[2][8];
+	if ((block == 0 || block == 2) && rank == 0) {
+		MPI_Send(&com, 12, MPI_INT, 0, block, intercomm);
+	}
 
-		for (int j = 0; j < 8; j++) {
-			d[0][j] = my.first[j];
-			d[1][j] = my.second[j];
+	if ((block == 1 || block == 3) && rank == 0) {
+		int buf[12];
+		MPI_Recv(&buf, 12, MPI_INT, MPI_ANY_SOURCE, block - 1, intercomm, MPI_STATUS_IGNORE);
+
+		cout << endl;
+		cout << "From " << block << " group, buf = ";
+		for (int i = 0; i < 12; ++i) {
+			cout << buf[i] << " ";
 		}
 		cout << endl;
-
-
-		cout << "matrix on process : " << rank << endl;
-
-		for (int i = 0; i < 2; i++) {
-			for (int j = 0; j < 8; j++) {
-				cout << d[i][j] << " ";
-			}
-			cout << endl;
-		}
 	}
 
-	if (rank == 3) {
-		MPI_Status status3;
-		MPI_Recv(&my, 1, newtype, 0, 33, MPI_COMM_WORLD, &status3);
 
-		int d[2][8];
+	if (comm != MPI_COMM_NULL) MPI_Comm_free(&comm);
 
-		for (int j = 0; j < 8; j++) {
-			d[0][j] = my.first[j];
-			d[1][j] = my.second[j];
-		}
-		cout << endl;
-
-
-		cout << "matrix on process : " << rank << endl;
-
-		for (int i = 0; i < 2; i++) {
-			for (int j = 0; j < 8; j++) {
-				cout << d[i][j] << " ";
-			}
-			cout << endl;
-		}
-	}
-
-	MPI_Type_free(&newtype);
 	MPI_Finalize();
 	return 0;
-
 }
-
-
-
 
