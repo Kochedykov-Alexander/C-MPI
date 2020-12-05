@@ -159,7 +159,7 @@
 //        
 //        int p = 12 / size + 1;
 //
-//        // вывод блока из 0-го процесса
+//        
 //        printf("from process %d: ", rank);
 //        for (int i = 0; i < p; i++) {
 //            printf("%d ", a[i]);
@@ -170,7 +170,7 @@
 //        for (int i = 1; i < size; i++) {
 //
 //            // начало блока
-//            int begin = i * (12 / p) + i;
+//            int begin = i * (12 / size) + i;
 //
 //            //проверка последнего блока
 //            if (12 - begin <= p) {
@@ -560,70 +560,73 @@ d) Обмен элементов двух векторов yi ↔xi.
 минимального элемента.Использовать функции MPI_Scatter и MPI_Reduce с операцией
 MPI_MINLOC.*/
 
-
+//#include <mpi.h>
+//#include<stdio.h>
 //#include <iostream>
-//#include <cmath>
-//#include "mpi.h"
-//#include <stdio.h>
-//#include <cstdlib>
-//
-//using namespace std;
-//
-//
+//#include "time.h"
 //
 //int main(int argc, char** argv) {
-//   MPI_Init(&argc, &argv);
 //
-//    int rank, size;
-//    MPI_Status status;
+//	int rank, size;
+//	const int N = 10;
 //
-//    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-//    MPI_Comm_size(MPI_COMM_WORLD, &size);
+//	int block;
+//	float* x = NULL;
+//	float* y = NULL;
+//	float minVal;
+//	int minIndex;
 //
-//    const int p = size;
-//    const int n = 150;
-//    const int count = (int) (n/p);
-//    int globaldata[n];
-//    int* localdata = new int[count];
+//	struct {
+//		float value;
+//		int   index;
+//	} in, out;
 //
-//    struct {
-//        float value;
-//        int index;
-//    }
+//	MPI_Comm comm = MPI_COMM_WORLD;
 //
-//    local_in, local_out;
+//	MPI_Init(&argc, &argv);
+//	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//	MPI_Comm_size(MPI_COMM_WORLD, &size);
 //
-//    if (rank == 0) {
-//        for (int i = 0; i < n; i++) {
-//            globaldata[i] = (int)(rand() % 100);
-//            cout << globaldata[i] << " ";
-//        }
-//        printf("\n process - %d defined global data \n", rank);
-//        printf("count of processes: %d, local_data count of massive = %d\n", size, count);
-//    }
+//	if (rank == 0) {
+//		x = (float*)malloc(N * sizeof(float));
+//		printf("Process=%d \nArray :", rank);
+//		srand(time(0));
+//		for (int i = 0; i < N; i++)
+//		{
+//			x[i] = rand() % 100 + 1;
+//			printf("%.3g ", x[i]);
+//		}
+//		printf("\n");
+//	}
 //
-//    MPI_Scatter(globaldata, n / size, MPI_INT, &localdata, n / size, MPI_INT, 0, MPI_COMM_WORLD);
+//	block = N / size;
+//	y = (float*)malloc(block * sizeof(float));
 //
-//    local_in.value = localdata[0];
-//    local_in.index = 0;
-//    for (int i = 1; i < count; i++) {
-//        if (local_in.value > localdata[i]) {
-//            local_in.value = localdata[i];
-//            local_in.index = i;
-//        }
-//    }
-//    local_in.index = rank * count + local_in.index;
-//   MPI_Reduce(&local_in, &local_out, 1, MPI_FLOAT_INT, MPI_MINLOC, 0, MPI_COMM_WORLD);
+//	MPI_Scatter(x, block, MPI_FLOAT, y, block, MPI_FLOAT, 0, comm);
 //
+//	in.index = 0;
+//	in.value = y[0];
 //
-//    if (rank == 0) {
-//        float min_value = local_out.value;
-//        int min_index = local_out.index % n;
-//        cout << "\n\n minimal value = " << min_value << " with index = " << min_index;
-//    }
+//	printf("Process = %d \n", rank);
+//	for (int i = 0; i < block; i++) {
+//		if (y[i] < in.value) {
+//			in.value = y[i];
+//			in.index = i;
+//		}
+//		printf("%.3g ", y[i]);
+//	}
+//	in.index = rank * block + in.index;
 //
-//    MPI_Finalize();
-//    return 0;
+//	MPI_Reduce(&in, &out, 1, MPI_FLOAT_INT, MPI_MINLOC, 0, comm);
+//
+//	if (rank == 0) {
+//		minVal = out.value;
+//		minIndex = out.index;
+//		printf("\nProcess = %i Result : min= %.3g , index = %d\n", rank, minVal, minIndex);
+//	}
+//
+//	MPI_Finalize();
+//
 //}
 
 
@@ -789,10 +792,6 @@ MPI_Gather для сбора вычисленных данных в матриц
 //
 //
 //
-
-
-
-
 
 
 /*
@@ -1668,8 +1667,8 @@ int main(int argc, char** argv)
 
 	MPI_Comm comm;
 
-	int block = rank / 3;
-	MPI_Comm_split(MPI_COMM_WORLD, block, rank % 3, &comm);
+	int color = rank / 3;
+	MPI_Comm_split(MPI_COMM_WORLD, color, rank % 3, &comm);
 
 	int newrank = -1;
 	if (comm != MPI_COMM_NULL) {
@@ -1680,36 +1679,36 @@ int main(int argc, char** argv)
 		MPI_Comm_size(comm, &comm_size);
 	}
 
-	int groups[4] = { block, block, block, block};
+	int groups[4] = { color, color , color , color };
 
 	int com[12];
 	MPI_Gather(&groups, 4, MPI_INT, &com, 4, MPI_INT, 0, comm);
 
 
-	if (rank == 0) {
-		cout << "from " << block << " group, com = ";
+	if (newrank == 0) {
+		cout << "from " << color << " group, com = ";
 		for (int i = 0; i < 12; ++i) {
 			cout << com[i] << " ";
 		}
 		cout << endl;
 	}
 
-	int tag = -1;
-	int rlead = -1;
+	int tag = 0;
+	int rlead = 0;
 
-	if (block == 0) {
+	if (color == 0) {
 		tag = 333;
 		rlead = 3;
 	}
-	if (block == 1) {
+	if (color == 1) {
 		tag = 333;
 		rlead = 0;
 	}
-	if (block == 2) {
+	if (color == 2) {
 		tag = 999;
 		rlead = 9;
 	}
-	if (block == 3) {
+	if (color == 3) {
 		tag = 999;
 		rlead = 6;
 	}
@@ -1717,16 +1716,16 @@ int main(int argc, char** argv)
 	MPI_Comm intercomm;
 	MPI_Intercomm_create(comm, 0, MPI_COMM_WORLD, rlead, tag, &intercomm);
 
-	if ((block == 0 || block == 2) && rank == 0) {
-		MPI_Send(&com, 12, MPI_INT, 0, block, intercomm);
+	if ((color == 0 || color == 2) && newrank == 0) {
+		MPI_Send(&com, 12, MPI_INT, 0, color, intercomm);
 	}
 
-	if ((block == 1 || block == 3) && rank == 0) {
+	if ((color == 1 || color == 3) && newrank == 0) {
 		int buf[12];
-		MPI_Recv(&buf, 12, MPI_INT, MPI_ANY_SOURCE, block - 1, intercomm, MPI_STATUS_IGNORE);
+		MPI_Recv(&buf, 12, MPI_INT, MPI_ANY_SOURCE, color - 1, intercomm, MPI_STATUS_IGNORE);
 
 		cout << endl;
-		cout << "From " << block << " group, buf = ";
+		cout << "From " << color << " group, buf = ";
 		for (int i = 0; i < 12; ++i) {
 			cout << buf[i] << " ";
 		}
