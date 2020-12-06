@@ -426,130 +426,265 @@ d) Обмен элементов двух векторов yi ↔xi.
 */
 
 
-//#include<mpi.h>
+
+//#include <mpi.h>
 //#include<stdio.h>
-//#include<iostream>
-//
-//using namespace std;
-//
+//#include <iostream>
 //
 //int main(int argc, char** argv)
 //{
-//	int rank, size;
+//    int rank, size;
+//    const int matrixSize = 3;
+//    MPI_Init(&argc, &argv);
+//    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//    MPI_Comm_size(MPI_COMM_WORLD, &size);
+//    float C[matrixSize][matrixSize];
 //
-//	MPI_Init(&argc, &argv);
-//	MPI_Comm_size(MPI_COMM_WORLD, &size);
-//	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//    if (rank == 0) {
 //
-//	const int N = 5;
+//        float A[matrixSize][matrixSize];
+//        float B[matrixSize][matrixSize];
 //
-//	int sw = sqrt(size - 1);
-//	int block = N / sw;
+//        for (int i = 0; i < matrixSize; i++)
+//        {
+//            for (int j = 0; j < matrixSize; j++)
+//            {
+//                A[i][j] = rand() % 5 + 1;
+//                B[i][j] = rand() % 5 + 1;
+//            }
+//        }
+//        printf("\nProcess = %d :\n", rank);
+//        printf("Array A : \n");
+//        for (int i = 0; i < matrixSize; i++)
+//        {
+//            for (int j = 0; j < matrixSize; j++) {
+//                printf("A[%d][%d]=%.3g ", i, j, A[i][j]);
+//            }
+//            printf("\n");
+//        }
 //
-//	if (rank == 0) {
+//        printf("Array B : \n");
+//        for (int i = 0; i < matrixSize; i++)
+//        {
+//            for (int j = 0; j < matrixSize; j++) {
+//                printf("B[%d][%d]=%.3g ", i, j, B[i][j]);
+//            }
+//            printf("\n");
+//        }
 //
-//		double blocks_a;
-//		double a[N][N];
-//		double b[N][N];
+//        int block = ceil((double)matrixSize / (size - 1));
 //
+//        float cBuffer[matrixSize][matrixSize];
 //
-//		int p = ceil((double) (N + N) / (size - 1));
+//        for (int i = 1; i < size; i++) {
+//
+//            int shift = (i - 1) * block;
+//
+//            if (matrixSize - shift <= block) {
+//                block = matrixSize - shift;
+//            }
+//            
+//            MPI_Send(&block, 1, MPI_INT, i, 1000, MPI_COMM_WORLD);
+//            MPI_Send(&shift, 1, MPI_INT, i, 2000, MPI_COMM_WORLD);
+//
+//            for (int j = shift; j < shift + block; j++) {
+//                MPI_Send(&A[j][0], matrixSize, MPI_FLOAT, i, 1001, MPI_COMM_WORLD);
+//                MPI_Send(&B[j][0], matrixSize, MPI_FLOAT, i, 2001, MPI_COMM_WORLD);
+//
+//            }
+//
+//            MPI_Status cStatus;
+//
+//            for (int j = shift; j < shift + block; j++) {
+//                MPI_Recv(cBuffer[j], matrixSize, MPI_FLOAT, i, 1003, MPI_COMM_WORLD, &cStatus);
+//            }
 //		
-//		
-//		for (int i = 1; i < size; i++) {
+//        }
+//        printf("Process = %d result Array C:\n", rank);
+//        for (int i = 0; i < matrixSize; i++)
+//        {
+//            for (int j = 0; j < matrixSize; j++) {
+//                printf("C[%d][%d]=%.3g ", i, j, cBuffer[i][j]);
+//            }
+//            printf("\n");
+//        }
+//
+//    } else {
+//
+//        int block;
+//        int shift;
+//        float  aBuffer[matrixSize][matrixSize];
+//        float  bBuffer[matrixSize][matrixSize];
+//        MPI_Status blockStatus;
+//        MPI_Status shiftStatus;
+//        MPI_Status lineAStatus;
+//        MPI_Status lineBStatus;
 //
 //
-//			int begin = (i - 1) * p;
+//        MPI_Recv(&block, 1, MPI_INT, MPI_ANY_SOURCE, 1000, MPI_COMM_WORLD, &blockStatus);
+//        MPI_Recv(&shift, 1, MPI_INT, MPI_ANY_SOURCE, 2000, MPI_COMM_WORLD, &shiftStatus);
 //
+//        printf("\nProcess = %d \n", rank);
 //
-//			if (N - begin <= p) {
-//				p = N - begin;
-//			}
+//        for (int i = shift; i < shift + block; i++) {
 //
-//			
+//            MPI_Recv(&aBuffer[i], matrixSize, MPI_FLOAT, MPI_ANY_SOURCE, 1001, MPI_COMM_WORLD, &lineAStatus);
+//            MPI_Recv(&bBuffer[i], matrixSize, MPI_FLOAT, MPI_ANY_SOURCE, 2001, MPI_COMM_WORLD, &lineBStatus);
 //
+//            for (int j = 0; j < matrixSize; j++) {
+//                printf("A[%d][%d]=%.3g ", i, j, aBuffer[i][j]);      
+//            }
+//            printf("\n");
 //
-//			MPI_Send(a + begin, p < 0 ? 0 : p, MPI_INT, i, 11, MPI_COMM_WORLD);
-//			MPI_Send(b + begin, p < 0 ? 0 : p, MPI_INT, i, 22, MPI_COMM_WORLD);
-//		}
+//            for (int j = 0; j < matrixSize; j++) {
+//                printf("B[%d][%d]=%.3g ", i, j, bBuffer[i][j]);            
+//            }
 //
+//            printf("\n");
 //
+//            for (int j = 0; j < matrixSize; j++) {
+//                C[i][j] = aBuffer[i][j] * bBuffer[i][j];
+//                printf("C[%d][%d]=%.3g ", i, j, C[i][j]);
+//            }
+//            printf("\n");
 //
-//			for (int i = 1; i < size; i++) {
+//            MPI_Send(&C[i][0], matrixSize, MPI_FLOAT, 0, 1003, MPI_COMM_WORLD);
+//        }
 //
+//    }
 //
-//				MPI_Status status_a;
-//				int elements_a = 0;
-//				int* buffer_a;
-//				int elements_a;
+//    MPI_Finalize();
 //
-//
-//				MPI_Probe(i, 33, MPI_COMM_WORLD, &status_a);
-//				MPI_Get_count(&status_a, MPI_INT, &elements_a);
-//				buffer_a = new int[elements_a];
-//				MPI_Recv(buffer_a, elements_a, MPI_INT, i, 33, MPI_COMM_WORLD, &status_a);
-//				
-//
-//
-//				for (int i = 0; i < elements_a; i++) {
-//					printf("%d ", buffer_a[i]);
-//			
-//				}
-//				printf("\n\n");
-//
-//				
-//
-//				for (int i = 0; i < N; i++) {
-//					for (int j = 0; j < N; j++)
-//					{
-//						a1[i]
-//					}
-//				}
-//			}
-//		}
-//
-//			else {
-//
-//				int elements_a = 0;
-//				int elements_b = 0;
-//				int* buffer_a;
-//				int* buffer_b;
-//				MPI_Status status_a;
-//				MPI_Status status_b;
-//
-//				MPI_Probe(MPI_ANY_SOURCE, 11, MPI_COMM_WORLD, &status_a);
-//				MPI_Get_count(&status_a, MPI_INT, &elements_a);
-//				buffer_a = new int[elements_a];
-//				MPI_Recv(buffer_a, elements_a, MPI_INT, MPI_ANY_SOURCE, 11, MPI_COMM_WORLD, &status_a);
-//
-//				MPI_Probe(MPI_ANY_SOURCE, 22, MPI_COMM_WORLD, &status_b);
-//				MPI_Get_count(&status_b, MPI_INT, &elements_b);
-//				buffer_b = new int[elements_b];
-//				MPI_Recv(buffer_b, elements_b, MPI_INT, MPI_ANY_SOURCE, 22, MPI_COMM_WORLD, &status_b);
-//
-//				printf("\n\n");
-//
-//				printf("process %d: \n", rank);
-//
-//
-//				int* z = new int[elements_a][elements_b];
-//					for (int i = 0; i < ele; i++) {
-//						z[i] = a * buffer_x[i] + b * buffer_y[i];
-//						printf(" z = a* xi * + b* yi : %d ", z[i]);
-//				}
-//				printf("\n\n");
-//				MPI_Send(z, elements_x, MPI_INT, 0, 33, MPI_COMM_WORLD);
-//
-//			}
-//			MPI_Finalize();
-//		}
-//
-//
-//
-//	
+//}
 
-/*
-*/
+
+//#include <mpi.h>
+//#include<stdio.h>
+//#include <iostream>
+//
+//int main(int argc, char** argv)
+//{
+//    int rank, size;
+//    const int matrixSize = 3;
+//    MPI_Init(&argc, &argv);
+//    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//    MPI_Comm_size(MPI_COMM_WORLD, &size);
+//    float C[matrixSize][matrixSize];
+//
+//    if (rank == 0) {
+//
+//        float A[matrixSize][matrixSize];
+//        float B[matrixSize][matrixSize];
+//
+//        for (int i = 0; i < matrixSize; i++)
+//        {
+//            for (int j = 0; j < matrixSize; j++)
+//            {
+//                A[i][j] = rand() % 5 + 1;
+//                B[i][j] = rand() % 5 + 1;
+//            }
+//        }
+//        printf("\nProcess = %d :\n", rank);
+//        printf("Array A : \n");
+//        for (int i = 0; i < matrixSize; i++)
+//        {
+//            for (int j = 0; j < matrixSize; j++) {
+//                printf("A[%d][%d]=%.3g ", i, j, A[i][j]);
+//            }
+//            printf("\n");
+//        }
+//
+//        printf("Array B : \n");
+//        for (int i = 0; i < matrixSize; i++)
+//        {
+//            for (int j = 0; j < matrixSize; j++) {
+//                printf("B[%d][%d]=%.3g ", i, j, B[i][j]);
+//            }
+//            printf("\n");
+//        }
+//
+//        int block = ceil((double)matrixSize / (size - 1));
+//
+//        printf("Process = %d result Array C:\n", rank);
+//
+//        for (int i = 1; i < size; i++) {
+//
+//            int shift = (i - 1) * block;
+//
+//            if (matrixSize - shift <= block) {
+//                block = matrixSize - shift;
+//            }
+//
+//            MPI_Send(&B[0][0], matrixSize * matrixSize, MPI_FLOAT, i, 2000, MPI_COMM_WORLD);
+//
+//            for (int j = shift; j < shift + block; j++) {
+//                MPI_Send(&A[j], matrixSize, MPI_FLOAT, i, 1000, MPI_COMM_WORLD);
+//            }
+//
+//            float* cBuffer = new float[matrixSize];
+//            MPI_Status cStatus;
+//
+//            for (int j = 0; j < matrixSize; j++) {
+//                cBuffer[j] = 0;
+//            }
+//
+//            MPI_Recv(cBuffer, matrixSize, MPI_FLOAT, i, 1001, MPI_COMM_WORLD, &cStatus);
+//
+//            for (int j = 0; j < matrixSize; j++) {
+//                printf("%.3g ", cBuffer[j]);
+//            }
+//            printf("\n");
+//
+//        }
+//
+//    }
+//    else {
+//
+//        float *aBuffer = new float[matrixSize];
+//        float bBuffer[matrixSize][matrixSize];
+//        float result[matrixSize];
+//        MPI_Status lineAStatus;
+//        MPI_Status bStatus;
+//
+//        for (int i = 0; i < matrixSize; i++) {
+//            result[i] = 0;
+//        }
+//
+//        MPI_Recv(aBuffer, matrixSize, MPI_FLOAT, MPI_ANY_SOURCE, 1000, MPI_COMM_WORLD, &lineAStatus);
+//        MPI_Recv(&bBuffer, matrixSize * matrixSize, MPI_FLOAT, MPI_ANY_SOURCE, 2000, MPI_COMM_WORLD, &bStatus);
+//
+//        printf("\nProcess = %d \n", rank);
+//
+//        for (int i = 0; i < matrixSize; i++) {
+//            printf("A[%d]=%.3g ", i, aBuffer[i]);
+//        }
+//        printf("\n");
+//
+//        for (int i = 0; i < matrixSize; i++) {
+//            for (int j = 0; j < matrixSize; j++) {
+//                printf("B[%d][%d]=%.3g ", i, j, bBuffer[i][j]);
+//            }
+//            printf("\n");
+//        }
+//
+//
+//        for (int i = 0; i < matrixSize; i++) {
+//            for (int j = 0; j < matrixSize; j++) {
+//                result[i] += aBuffer[j] * bBuffer[j][i];
+//            }
+//        }
+//
+//        for (int i = 0; i < matrixSize; i++) {
+//            printf("C[%d]=%.3g ", i, result[i]);
+//        }
+//
+//        MPI_Send(&result, matrixSize, MPI_FLOAT, 0, 1001, MPI_COMM_WORLD);
+//
+//    }
+//
+//    MPI_Finalize();
+//
+//}
 
 
 
@@ -637,161 +772,189 @@ MPI_MINLOC.*/
 итогового значения использовать функцию MPI_Reduce с операцией MPI_MAX.
 */
 
-	/*#include "mpi.h"
-	using namespace std;
+#include <mpi.h>
+#include<stdio.h>
+#include <iostream>
+#include "time.h"
 
-	int main(int argc, char** argv)
-	{
+int main(int argc, char** argv) {
 
-		int rank, word_size;
-		MPI_Init(&argc, &argv);
-		MPI_Comm_size(MPI_COMM_WORLD, &word_size);
-		MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-		int block = 3;
-		int N = word_size * block;
-		int M = N;
-		int** a = new int[N][M];
-		int** local = new int[block][M];
+    int rank, size;
+    const int n = 6;
+    const int m = 6;
+
+    int block;
+    int A[n][m];
+    int sbuf[n][m];
+    int norm = 0;
+
+    MPI_Comm comm = MPI_COMM_WORLD;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
 
 
+    if (rank == 0) {
+        printf("Array :\n", rank);
+        srand(time(0));
+        for (int i = 0; i < n; i++)
+        {
+            for (int j = 0; j < m; j++)
+            {
+                A[i][j] = rand() % 100;
+                printf("A[%d][%d]=%d ", i, j, A[i][j]);
+            }
+            printf("\n");
+        }
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                sbuf[i][j] = A[j][i];
+         }
+            
+        }
+    }
+    block = n / size;
+    int* y = new int[block * m];
 
-		if (rank == 0) {
+    MPI_Scatter(sbuf, block * m, MPI_INT, y, block * m, MPI_INT, 0, comm);
 
-			for (int i = 0; i < N; ++i) {
-				for (int j = 0; j < N; ++j) {
-					a[i][j] = rand() % 100;
-				}
-			}
-			
-		}
-		MPI_Scatter(&(a[0][0]), block * M, MPI_INT, &(local[0][0]), block * M, MPI_INT, 0, MPI_COMM_WORLD);
-		if (rank == 0) {
-			stringstream ss;
-			for (int i = 0; i < N; ++i) {
-				for (int j = 0; j < M; ++j) {
-					cout << a[i][j] << " ";
-				}
-				cout << endl;
-			}
-			cout << ss.str();
-		}
-		int local_ans = accumulate(local[0], local[0] + M, (int)0);
-		for (int i = 1; i < block; ++i) local_ans = max(local_ans, accumulate(local[i], local[i] + M, (int)0));
-		int ans;
+    printf("process = %d \n", rank);
+    for (int i = 0; i < block; i++) {
+        for (int j = 0; j < m; j++) {
+            printf("%d ", y[i * m + j]);
+        }
+        printf("\n");
+    }
 
-		MPI_Reduce(&local_ans, &ans, 1, MPI_INT, MPI_MAX, 0, MPI_COMM_WORLD);
-		if (rank == 0) cout << "ans = " << ans << endl;
-	MPI_Finalize();
+    int sum = 0;
+
+    for (int i = 0; i < block; i++) {
+        int lineSum = 0;
+        for (int j = 0; j < m; j++) {
+            lineSum += abs(y[i * m + j]);
+        }
+        if (lineSum > sum) {
+            sum = lineSum;
+        }
+        printf("sum = %d\n", lineSum);
+    }
+
+
+    MPI_Reduce(&sum, &norm, 1, MPI_INT, MPI_MAX, 0, comm);
+
+    if (rank == 0) {
+        printf("\nProcess = %i Result : S = %d\n", rank, norm);
+    }
+
+    MPI_Finalize();
+    return 0;
 }
-		*/
-
 
 /* 10. Написать программу вычисления поэлементного умножения матриц Сi, j = Ai, jBi.j.
 Использовать функции MPI_Scatter для распределения элементов матриц A и B, и
 MPI_Gather для сбора вычисленных данных в матрицу C.
 */
-//
-//using namespace std;
-//
-//#include<mpi.h>
-//#include<stdio.h>
-//#include<iostream>
-//#include <mpi.h>
-//#include <vector>
-//#include <ctime>
-//
-//
-//
-//
-//int main(int argc, char** argv)
-//{
-//	int rank, size, source = 0;
-//
-//	MPI_Init(&argc, &argv);
-//	MPI_Comm_size(MPI_COMM_WORLD, &size);
-//	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-//
-//	#define N 10
-//	#define BUF_SIZE 100
-//
-//	std::vector<std::vector<int>> A(N);
-//	std::vector<std::vector<int>> B(N);
-//	std::vector<int> sbuf, rbuf, s2buf, r2buf, g_rcvbuf;
-//	
-//
-//
-//	if (rank == 0) {
-//
-//
-//		for (int i = 0; i < N; i++) {
-//			for (int j = 0; j < N; j++) {
-//				A.at(i).push_back(rand() % N);
-//				B.at(i).push_back(rand() % N);
-//			}
-//		}
-//
-//		std::cout << "matrix A: " << std::endl;
-//		for (int i = 0; i < N; i++) {
-//			for (int j = 0; j < N; j++) {
-//				std::cout << A.at(i).at(j) << " ";
-//			}
-//			std::cout << std::endl;
-//		}
-//
-//		std::cout << "matrix B: " << std::endl;
-//		for (int i = 0; i < N; i++) {
-//			for (int j = 0; j < N; j++) {
-//				std::cout << B.at(i).at(j) << " ";
-//			}
-//			std::cout << std::endl;
-//		}
-//
-//		for (int i = 0; i < N; i++) {
-//			for (int j = 0; j < N; j++) {
-//				sbuf.push_back(A.at(i).at(j));
-//			}
-//		}
-//
-//		for (int i = 0; i < N; i++) {
-//			for (int j = 0; j < N; j++) {
-//				s2buf.push_back(B.at(i).at(j));
-//			}
-//		}
-//		
-//		int count = ceil((double) BUF_SIZE / (size - 1));
-//	
-//
-//		MPI_Scatter(sbuf.data(), count , MPI_INT, rbuf.data(), count, MPI_FLOAT, source, MPI_COMM_WORLD);
-//		MPI_Scatter(s2buf.data(), count, MPI_INT, r2buf.data(), count, MPI_FLOAT, source, MPI_COMM_WORLD);
-//	}
-//
-//	else {
-//
-//
-//		int r = 0;
-//
-//		for (int i = 0; i < BUF_SIZE; i++) {
-//			r += rbuf.at(i) * r2buf.at(i);
-//
-//		}
-//
-//
-//		MPI_Gather(&r, 1, MPI_FLOAT, g_rcvbuf.data(), 1, MPI_FLOAT, source, MPI_COMM_WORLD);
-//	}
-//
-//		if (rank == 0) {
-//			std::cout << "result for 0 process = " << " ";
-//			for (auto i : g_rcvbuf)
-//				std::cout << i << " ";
-//			std::cout << std::endl;
-//		}
-//
-//		MPI_Finalize();
-//		return 0;
-//	}
-//
-//
-//
+
+
+#include <mpi.h>
+#include<stdio.h>
+#include <iostream>
+#include "time.h"
+
+int main(int argc, char** argv) {
+
+    int rank, size;
+    const int matrixSize = 4;
+
+    int block;
+    int A[matrixSize][matrixSize];
+    int B[matrixSize][matrixSize];
+    int C[matrixSize][matrixSize];
+
+    MPI_Comm comm = MPI_COMM_WORLD;
+
+    MPI_Init(&argc, &argv);
+    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+    if (rank == 0) {
+        srand(time(0));
+        for (int i = 0; i < matrixSize; i++)
+        {
+            for (int j = 0; j < matrixSize; j++)
+            {
+                A[i][j] = rand() % 5 + 1;
+                printf("A[%d][%d]=%d ", i, j, A[i][j]);
+            }
+            printf("\n");
+        }
+        printf("\n");
+        for (int i = 0; i < matrixSize; i++)
+        {
+            for (int j = 0; j < matrixSize; j++)
+            {
+                B[i][j] = rand() % 5 + 1;
+                printf("B[%d][%d]=%d ", i, j, B[i][j]);
+            }
+            printf("\n");
+        }
+    }
+
+    block = matrixSize / size;
+    int* x = new int[block * matrixSize];
+    int* y = new int[block * matrixSize];
+    int* z = new int[block * matrixSize];
+
+    MPI_Scatter(A, block * matrixSize, MPI_INT, x, block * matrixSize, MPI_INT, 0, comm);
+    MPI_Scatter(B, block * matrixSize, MPI_INT, y, block * matrixSize, MPI_INT, 0, comm);
+
+    printf("Process = %d  A part\n", rank);
+    for (int i = 0; i < block; i++) {
+        for (int j = 0; j < matrixSize; j++) {
+            printf("%d ", x[i * matrixSize + j]);
+        }
+        printf("\n");
+    }
+    printf("Process = %d  B part\n", rank);
+    for (int i = 0; i < block; i++) {
+        for (int j = 0; j < matrixSize; j++) {
+            printf("%d ", y[i * matrixSize + j]);
+        }
+        printf("\n");
+    }
+
+    for (int i = 0; i < block; i++) {
+        for (int j = 0; j < matrixSize; j++) {
+            z[i * matrixSize + j] = x[i * matrixSize + j] * y[i * matrixSize + j];
+        }
+    }
+    printf("Array z : \n");
+    for (int i = 0; i < block; i++) {
+        for (int j = 0; j < matrixSize; j++) {
+            printf("%d ", z[i * matrixSize + j]);
+        }
+        printf("\n");
+    }
+
+    MPI_Gather(z, block * matrixSize, MPI_INT, C, block * matrixSize, MPI_INT, 0, comm);
+
+    if (rank == 0) {
+        printf("Result : \n");
+        for (int i = 0; i < matrixSize; i++)
+        {
+            for (int j = 0; j < matrixSize; j++)
+            {
+                printf("C[%d][%d]=%d ", i, j, C[i][j]);
+            }
+            printf("\n");
+        }
+    }
+
+    MPI_Finalize();
+    return 0;
+}
+
 
 
 /*
@@ -979,6 +1142,134 @@ MPI_Gather для сбора вычисленных данных в матриц
 //	MPI_Finalize();
 //	return 0;
 //}
+
+
+/*
+* Пусть  A(n,m) –матрица,  созданная  на  нулевом  процессе.  
+Пусть  есть4  процесса и процесс 0посылает части этой матрицы другим процессам. 
+Процессор 1 получает A(i,j) для i=n/2+1,...,n,  и j=1,...,m/2.  
+Процессор 2 получает A(i,j)  для i=1,...,n/2 и j=m/2+1,...,m  
+и процессор  3  получает  A(i,j)  для  i=n/2+1,...,n  and  j=m/2,...,m  .  
+Это  двумерная декомпозиция А на четыре процесса. Написать программу рассылки частей матрицы по процессам, используя функцию MPI_Scatterv.
+*/
+
+
+
+//#include <iostream>
+//#include <mpi.h>
+//#include <stdio.h>
+//#include <math.h>
+//
+//using namespace std;
+//
+//int main(int argc, char **argv) {
+//
+//    int rank;
+//    int size;
+//
+//    
+//
+//
+//    const int n = 8;
+//    const int m = 8;
+//
+//    
+//    MPI_Init(&argc, &argv);
+//
+//    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//
+//    MPI_Comm_size(MPI_COMM_WORLD, &size);
+//
+//    const int recvcount = n * m / size;
+//    int *recvbuf = new int [recvcount];
+//    int index = 0;
+//    int *sbuf = new int [n * m];
+//    int* sendcounts = new int[size];
+//    int* displs = new int [size];
+//    int a[n][m];
+//
+//    if (rank == 0) {
+//
+//
+//        for (int i = 0; i < n; i++) {
+//            for (int j = 0; j < m; j++) {
+//                a[i][j] = rand() % 100;
+//            }
+//        }
+//
+//
+//        for (int i = 0; i < 8; i++) {
+//            for (int j = 0; j < 8; j++) {
+//                cout << a[i][j] << " ";
+//            }
+//            cout << endl;
+//        }
+//        cout << endl;
+//
+//        
+//        for (int i = 0; i < n / 2; i++) {
+//            for (int j = m / 2; j < m; j++) {
+//                sbuf[index] = a[i][j];
+//                index++;
+//            }
+//        }
+//
+//        for (int i = n / 2; i < n; i++) {
+//            for (int j = m / 2; j < m; j++) {
+//                sbuf[index] = a[i][j];
+//                index++;
+//            }
+//        }
+//
+//        for (int i = n / 2; i < n; i++) {
+//            for (int j = 0; j < m / 2; j++) {
+//                sbuf[index] = a[i][j];
+//                index++;
+//            }
+//        }
+//
+//        for (int i = n / 2; i < n; i++) {
+//            for (int j = m / 2; j < m ; j++) {
+//                sbuf[index] = a[i][j];
+//                index++;
+//            }
+//        }
+//
+//        
+//        
+//
+//        for(int i = 0; i < size; i++) {
+//            sendcounts[i] = 16;
+//            displs[i] = i * size * 4;
+//        }
+//    }
+//
+//  
+//   
+//    //разбивает сообщение из буфера посылки процесса root на равные части размером sendcount
+//    // и посылает i-ю часть в буфер приема процесса с номером i (в том числе и самому себе)
+//    MPI_Scatterv(sbuf, sendcounts, displs, MPI_INT, recvbuf, recvcount, MPI_INT, 0, MPI_COMM_WORLD);
+//
+//   
+//
+//    if (!recvbuf) return -1;
+//    printf("Received by = %d \n", rank);
+//    for(int i = 0; i < recvcount; i++ ) {
+//        if (i % 4 == 0 && i != 0) {
+//            printf("\n");
+//        }
+//        printf("%d ", recvbuf[i]);
+//    }
+//    printf("\n");
+//
+//
+//
+//    
+//
+//    MPI_Finalize();
+//    return 0;
+//}
+
 
 
 
@@ -1650,92 +1941,234 @@ MPI_Reduce и MPI_Bcast?
 Полученные массивы выдать на экран. Выполнить программу на 12 процессах.
 */
 
-#include "mpi.h"
-#include <iostream>
-#include <cstdlib>
+//#include "mpi.h"
+//#include <iostream>
+//#include <cstdlib>
+//
+//using namespace std;
+//
+//
+//int main(int argc, char** argv)
+//{
+//	MPI_Init(&argc, &argv);
+//
+//	int size, rank;
+//	MPI_Comm_size(MPI_COMM_WORLD, &size);
+//	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//
+//	MPI_Comm comm;
+//
+//	int color = rank / 3;
+//	MPI_Comm_split(MPI_COMM_WORLD, color, rank % 3, &comm);
+//
+//	int newrank = -1;
+//	if (comm != MPI_COMM_NULL) {
+//		MPI_Comm_rank(comm, &newrank);
+//	}
+//	int comm_size = -1;
+//	if (comm != MPI_COMM_NULL) {
+//		MPI_Comm_size(comm, &comm_size);
+//	}
+//
+//	int groups[4] = { color, color , color , color };
+//
+//	int com[12];
+//	MPI_Gather(&groups, 4, MPI_INT, &com, 4, MPI_INT, 0, comm);
+//
+//
+//	if (newrank == 0) {
+//		cout << "from " << color << " group, com = ";
+//		for (int i = 0; i < 12; ++i) {
+//			cout << com[i] << " ";
+//		}
+//		cout << endl;
+//	}
+//
+//	int tag = 0;
+//	int rlead = 0;
+//
+//	if (color == 0) {
+//		tag = 333;
+//		rlead = 3;
+//	}
+//	if (color == 1) {
+//		tag = 333;
+//		rlead = 0;
+//	}
+//	if (color == 2) {
+//		tag = 999;
+//		rlead = 9;
+//	}
+//	if (color == 3) {
+//		tag = 999;
+//		rlead = 6;
+//	}
+//
+//	MPI_Comm intercomm;
+//	MPI_Intercomm_create(comm, 0, MPI_COMM_WORLD, rlead, tag, &intercomm);
+//
+//	if ((color == 0 || color == 2) && newrank == 0) {
+//		MPI_Send(&com, 12, MPI_INT, 0, color, intercomm);
+//	}
+//
+//	if ((color == 1 || color == 3) && newrank == 0) {
+//		int buf[12];
+//		MPI_Recv(&buf, 12, MPI_INT, MPI_ANY_SOURCE, color - 1, intercomm, MPI_STATUS_IGNORE);
+//
+//		cout << endl;
+//		cout << "From " << color << " group, buf = ";
+//		for (int i = 0; i < 12; ++i) {
+//			cout << buf[i] << " ";
+//		}
+//		cout << endl;
+//	}
+//
+//
+//	if (comm != MPI_COMM_NULL) MPI_Comm_free(&comm);
+//
+//	MPI_Finalize();
+//	return 0;
+//}
 
-using namespace std;
+/*
+21. Найти среднее арифметическое положительных чисел массива
+*/
+
+//#include <mpi.h>
+//#include <iostream>
+//
+//#define N 10
+//
+//int main(int argc, char** argv) {
+//
+//	MPI_Init(&argc, &argv);
+//
+//	int x[10];
+//	int rank;
+//	int size;
+//	float result[2];
+//
+//	MPI_Comm_size(MPI_COMM_WORLD, &size);
+//	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//
+//	int elements_per_proc = N / size;
+//
+//	float localAverage;
+//
+//	if (rank == 0) {
+//		for (int i = 0; i < N; i++) {
+//			x[i] = rand() % 100;
+//			printf(" %d ", x[i]);
+//		}
+//	}
+//	int* displs[size];
+//	int* scounts[size];
+//
+//	for (int i = 0; i < size; ++i) {
+//		displs[i] = i * elements_per_proc;
+//		scounts[i] = elements_per_proc;
+//	}
+//
+//	MPI_Scatterv(x, scounts, displs, MPI_INT,
+//		x, elements_per_proc, MPI_INT, 0, MPI_COMM_WORLD);
+//
+//	localAverage = 0;
+//	int count = 0;
+//	for (int i = 0; i < elements_per_proc; i++) {
+//		if (x[i] > 0) {
+//			localAverage += x[i];
+//			count++;
+//		}
+//	}
+//
+//	float arr[2];
+//	arr[0] = localAverage;
+//	arr[1] = (float)count;
+//	MPI_Reduce(&arr, &result,
+//		2, MPI_FLOAT, MPI_SUM, 0, MPI_COMM_WORLD);
+//
+//	if (rank == 0)
+//		printf("\n average = %f \n", result[0] / result[1]);
+//
+//	MPI_Finalize();
+//	return 0;
+//}
+//
+//
+//
+//
 
 
-int main(int argc, char** argv)
-{
-	MPI_Init(&argc, &argv);
 
-	int size, rank;
-	MPI_Comm_size(MPI_COMM_WORLD, &size);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+/*
+23. Написать  программу  вычисления  числа  π  методом  Монте-Карло.  Суть  метода  в следующем.  
+Возьмем круг радиуса 1, тогда площадь круга  равна π, а площадь квадрата вокруг  круга  равна 4. 
+Следовательно, отношение площади  круга  к площади квадрата равно π/4. Случайным образом генерируем  точки в пределах контура  квадрата, тогда отношение числа точек,
+попавших в круг, к общему  количеству сгенерированных точек даст  величину  π/4. 
+Сгенерированная  точка  находится  в  круге,  если  ее  координаты соответствуют выражению x2+ y2<1.
+*/
 
-	MPI_Comm comm;
-
-	int color = rank / 3;
-	MPI_Comm_split(MPI_COMM_WORLD, color, rank % 3, &comm);
-
-	int newrank = -1;
-	if (comm != MPI_COMM_NULL) {
-		MPI_Comm_rank(comm, &newrank);
-	}
-	int comm_size = -1;
-	if (comm != MPI_COMM_NULL) {
-		MPI_Comm_size(comm, &comm_size);
-	}
-
-	int groups[4] = { color, color , color , color };
-
-	int com[12];
-	MPI_Gather(&groups, 4, MPI_INT, &com, 4, MPI_INT, 0, comm);
-
-
-	if (newrank == 0) {
-		cout << "from " << color << " group, com = ";
-		for (int i = 0; i < 12; ++i) {
-			cout << com[i] << " ";
-		}
-		cout << endl;
-	}
-
-	int tag = 0;
-	int rlead = 0;
-
-	if (color == 0) {
-		tag = 333;
-		rlead = 3;
-	}
-	if (color == 1) {
-		tag = 333;
-		rlead = 0;
-	}
-	if (color == 2) {
-		tag = 999;
-		rlead = 9;
-	}
-	if (color == 3) {
-		tag = 999;
-		rlead = 6;
-	}
-
-	MPI_Comm intercomm;
-	MPI_Intercomm_create(comm, 0, MPI_COMM_WORLD, rlead, tag, &intercomm);
-
-	if ((color == 0 || color == 2) && newrank == 0) {
-		MPI_Send(&com, 12, MPI_INT, 0, color, intercomm);
-	}
-
-	if ((color == 1 || color == 3) && newrank == 0) {
-		int buf[12];
-		MPI_Recv(&buf, 12, MPI_INT, MPI_ANY_SOURCE, color - 1, intercomm, MPI_STATUS_IGNORE);
-
-		cout << endl;
-		cout << "From " << color << " group, buf = ";
-		for (int i = 0; i < 12; ++i) {
-			cout << buf[i] << " ";
-		}
-		cout << endl;
-	}
-
-
-	if (comm != MPI_COMM_NULL) MPI_Comm_free(&comm);
-
-	MPI_Finalize();
-	return 0;
-}
-
+//#include <mpi.h>
+//#include <stdio.h>
+//#include <ctime>
+//#include <random>
+//
+//struct point {
+//    double x;
+//    double y;
+//};
+//
+//int main(int argc, char** argv) {
+//    int size, rank;
+//    MPI_Init(&argc, &argv);
+//    MPI_Comm_size(MPI_COMM_WORLD, &size);
+//    MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+//    int n = 10000;
+//    struct point* points = new point[n];
+//    srand(time(0));
+//    for (int i = 0; i < n; i++) {
+//        double x = 2 * (double)rand() / RAND_MAX - 1;
+//        double y = 2 * (double)rand() / RAND_MAX - 1;
+//        struct point p;
+//        p.x = x;
+//        p.y = y;
+//        points[i] = p;
+//    }
+//    int count = 0;
+//    int total = 0;
+//    int averageBlockLen = floor((double)n / size);
+//    int* sizes = new int[size];
+//    int* displs = new int[size];
+//    int disp = 0;
+//    for (int i = 0; i < size - 1; i++) {
+//        sizes[i] = averageBlockLen;
+//        displs[i] = disp;
+//        disp += averageBlockLen;
+//        if (rank == 0) {
+//        }
+//    }
+//    sizes[size - 1] = n - averageBlockLen * (size - 1);
+//    displs[size - 1] = disp;
+//    int blockLen = sizes[rank];
+//    struct point* block = new point[blockLen];
+//    int lengths[2] = { 1, 1 };
+//    MPI_Aint offsets[2] = { 0, sizeof(double) };
+//    MPI_Datatype types[2] = { MPI_DOUBLE, MPI_DOUBLE };
+//    MPI_Datatype pointType;
+//    MPI_Type_create_struct(2, lengths, offsets, types, &pointType);
+//    MPI_Type_commit(&pointType);
+//    MPI_Scatterv(points, sizes, displs, pointType, block, blockLen, pointType, 0, MPI_COMM_WORLD);
+//    for (int i = 0; i < blockLen; i++) {
+//        struct point p = block[i];
+//        if (p.x * p.x + p.y * p.y < 1) {
+//            count++;
+//        }
+//    }
+//    MPI_Reduce(&count, &total, 1, MPI_INT, MPI_SUM, 0, MPI_COMM_WORLD);
+//    if (rank == 0) {
+//        double pi = 4 * (double)total / n;
+//        printf("%.2lf\n", pi);
+//    }
+//    MPI_Finalize();
+//    return 0;
+//}

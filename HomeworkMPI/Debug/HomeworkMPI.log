@@ -1,2 +1,5 @@
 ﻿  HomeworkMPI.cpp
+C:\Users\Kochedykov Alexander\source\repos\HomeworkMPI\HomeworkMPI\HomeworkMPI.cpp(799,29): warning C4474: "printf" : для строки формата передано слишком много аргументов
+C:\Users\Kochedykov Alexander\source\repos\HomeworkMPI\HomeworkMPI\HomeworkMPI.cpp(799,29): message : заполнители и их параметры ожидают переменное число аргументов в количестве 0, но было предоставлено 1
+C:\Users\Kochedykov Alexander\source\repos\HomeworkMPI\HomeworkMPI\HomeworkMPI.cpp(800,19): warning C4244: аргумент: преобразование "time_t" в "unsigned int", возможна потеря данных
   HomeworkMPI.vcxproj -> C:\Users\Kochedykov Alexander\source\repos\HomeworkMPI\Debug\HomeworkMPI.exe
